@@ -1,0 +1,49 @@
+{
+  "frame": "home",
+  "source": "Daily Hero 3 -  Arkkhe (Copy).fig",
+  "basis": "Template #03 Enchanted Diary is used for motion mechanics and layout structure only. Zero pixels are reused, per REFERENCE.md. Every visual deviation below is deliberate.",
+  "omissions": [
+    {
+      "what": "Viaoda Libre Regular (display face)",
+      "why": "Replaced with Cross Stitch Cursive (CC BY 4.0, self-hosted). The fig's serif carries the template's editorial register; this portfolio's voice is handmade and personal. Attribution is rendered in the footer as required by the licence."
+    },
+    {
+      "what": "Warm dark palette (#263237, #160E05, #F69070, #C7E9F5)",
+      "why": "Full re-skin to the sky palette (#488ec9 main / #2765c8 edge, white type, #f26a1b accent) sampled from the approved mockup. The fig supplies structure and motion; colour comes from the brief."
+    },
+    {
+      "what": "Imprima Regular (body face)",
+      "why": "Dropped in favour of a system monospace stack. The brief's register is technical and typewriter-like — bracketed [ section labels ], mono credentials — which Imprima's humanist forms work against. Using the system stack also removes a webfont request. Note: --f-body and --f-mono are deliberately the same stack; the two tokens are kept distinct so a second face can be introduced later without touching component code."
+    },
+    {
+      "what": "All 13 embedded .fig raster assets: clouds-1, image-33, image-34, image-45, left-full-1, right-full-1, Rectangle-7, Preenchimento-generativo-1",
+      "why": "Zero pixels are reused from the template, per REFERENCE.md. Every image on the site is Kristina's own art (grass, clouds, goldfish, stickers, portraits) from Portfolio/. The fig contributes layout structure and motion curves only."
+    },
+    {
+      "what": "Off-frame decorative nodes in Group 50 / bg1 1",
+      "why": "Both exceed the 1440 frame at negative x. The overflow is the template's own bleed device, reproduced as CSS overscan rather than as discrete nodes."
+    }
+  ],
+  "additions": [
+    {
+      "what": "Film treatment (grain, black specks, Fuji colour cross, vignette, gate weave)",
+      "why": "Cinematic register requested in the brief. Not present in the fig, which is a static template."
+    },
+    {
+      "what": "Audio layer (ambient bed + UI feedback, muted by default)",
+      "why": "Requested in the brief. Off until the visitor opts in."
+    },
+    {
+      "what": "Custom morphing cursor and pointer-reactive widgets",
+      "why": "Requested in the brief. Desktop only; disabled under coarse pointer and reduced motion."
+    },
+    {
+      "what": "LinkedIn link in the hero",
+      "why": "Requested in the brief so contact is reachable without scrolling."
+    },
+    {
+      "what": "micro (0.25s) and drift (3.0s) motion tiers promoted into motionSpec",
+      "why": "Both are present in the fig's own transition data (10 and 2 uses respectively) but were unused by the site. Adopting them keeps every curve on the site traceable to the source file."
+    }
+  ]
+}

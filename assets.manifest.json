@@ -1,0 +1,152 @@
+{
+  "light_anchor": "bright high-key midday daylight from upper left, soft sky-blue bounce, no dramatic shadows",
+  "style_anchor": "Y2K collage cutout sticker, crisp edges, slight drop shadow, early-2000s desktop-wallpaper optimism, photographic not illustrated",
+  "assets": [
+    {
+      "id": "sticker-laptop-collage",
+      "role": "laptop centre only (tools left / timeline right are DOM)",
+      "have": false,
+      "alpha": true,
+      "prompt": "Open silver laptop shown three-quarter front, screen displaying a colourful grid project gallery, nothing else in frame, generous negative space on both left and right sides of the laptop, clear area reserved for text either side, bright high-key midday daylight from upper left with soft sky-blue bounce and no dramatic shadows, isolated on pure transparent background with clean cutout edges, Y2K collage cutout sticker with slight drop shadow, photographic product realism, not illustrated --ar 16:9 --style raw",
+      "notes": "Objects stripped \u2014 tools rail and project timeline are live DOM either side.",
+      "slot": "sticker-laptop-collage",
+      "ratio": "16:9",
+      "light_anchor": "bright high-key midday daylight from upper left, soft sky-blue bounce, no dramatic shadows",
+      "scene": "sticker-laptop-collage",
+      "text_over": true
+    },
+    {
+      "id": "sticker-iced-coffee",
+      "role": "about-section hand",
+      "have": false,
+      "alpha": true,
+      "prompt": "A hand holding out a tall clear plastic cup of iced coffee with chocolate drizzle and whipped cream toward the camera, forced perspective with the cup large in frame, bright high-key midday daylight from upper left with soft sky-blue bounce and no dramatic shadows, isolated on pure transparent background, Y2K collage cutout sticker with crisp edges and slight drop shadow, photographic realism --ar 1:1 --style raw",
+      "slot": "sticker-iced-coffee",
+      "ratio": "1:1",
+      "light_anchor": "bright high-key midday daylight from upper left, soft sky-blue bounce, no dramatic shadows",
+      "scene": "sticker-iced-coffee"
+    },
+    {
+      "id": "sticker-camera-omd",
+      "slot": "sticker-camera-omd",
+      "role": "about \u2014 main camera",
+      "have": false,
+      "alpha": true,
+      "ratio": "1:1",
+      "light_anchor": "bright high-key midday daylight from upper left, soft sky-blue bounce, no dramatic shadows",
+      "scene": "about",
+      "transparent_bg": "isolated on pure transparent background, clean cutout edge",
+      "prompt": "Olympus OM-D E-M10 Mark III mirrorless camera body in silver and black, three-quarter front view, with a vintage Soviet Zenit Helios lens mounted, chrome lens barrel with knurled focus ring and visible aperture blades, small stack of screw-on colour filters resting beside it, bright high-key midday daylight from upper left with soft sky-blue bounce and no dramatic shadows, isolated on pure transparent background with clean cutout edges, Y2K collage cutout sticker with slight drop shadow, photographic product realism, not illustrated --ar 1:1 --style raw"
+    },
+    {
+      "id": "sticker-chihuahua",
+      "slot": "sticker-chihuahua",
+      "role": "about \u2014 dog",
+      "have": false,
+      "alpha": true,
+      "ratio": "1:1",
+      "light_anchor": "bright high-key midday daylight from upper left, soft sky-blue bounce, no dramatic shadows",
+      "scene": "about",
+      "transparent_bg": "isolated on pure transparent background, clean cutout edge",
+      "prompt": "Small chihuahua sitting upright and alert, ears perked, looking directly at the camera with a bright curious expression, full body visible including paws and tail, short smooth coat, bright high-key midday daylight from upper left with soft sky-blue bounce and no dramatic shadows, isolated on pure transparent background with clean cutout edges, Y2K collage cutout sticker with slight drop shadow, photographic product realism, not illustrated --ar 1:1 --style raw",
+      "notes": "Ask user for coat colour before generating \u2014 a generic dog is worse than no dog."
+    },
+    {
+      "id": "sticker-cyberdeck",
+      "slot": "sticker-cyberdeck",
+      "role": "about \u2014 cyberdeck / LoRa",
+      "have": false,
+      "alpha": true,
+      "ratio": "1:1",
+      "light_anchor": "bright high-key midday daylight from upper left, soft sky-blue bounce, no dramatic shadows",
+      "scene": "about",
+      "transparent_bg": "isolated on pure transparent background, clean cutout edge",
+      "prompt": "LilyGO T-Deck handheld cyberdeck device, small rectangular unit with a tiny colour LCD screen, compact black BlackBerry-style thumb keyboard, a stubby LoRa antenna angled off one corner, exposed circuit board edges and visible solder joints, held at a three-quarter angle, bright high-key midday daylight from upper left with soft sky-blue bounce and no dramatic shadows, isolated on pure transparent background with clean cutout edges, Y2K collage cutout sticker with slight drop shadow, photographic product realism, not illustrated --ar 1:1 --style raw"
+    },
+    {
+      "id": "sticker-chainmail",
+      "slot": "sticker-chainmail",
+      "role": "about \u2014 chainmail + solder jewellery",
+      "have": false,
+      "alpha": true,
+      "ratio": "1:1",
+      "light_anchor": "bright high-key midday daylight from upper left, soft sky-blue bounce, no dramatic shadows",
+      "scene": "about",
+      "transparent_bg": "isolated on pure transparent background, clean cutout edge",
+      "prompt": "Handmade jewellery flat lay: a coiled length of silver chainmail weave in European 4-in-1 pattern, a stained-glass style copper-soldered pendant with a small crystal, a pair of round-nose jewellery pliers, a scatter of loose silver jump rings, arranged with clear gaps between each item, bright high-key midday daylight from upper left with soft sky-blue bounce and no dramatic shadows, isolated on pure transparent background with clean cutout edges, Y2K collage cutout sticker with slight drop shadow, photographic product realism, not illustrated --ar 1:1 --style raw"
+    },
+    {
+      "id": "sticker-sewing",
+      "slot": "sticker-sewing",
+      "role": "about \u2014 sewing",
+      "have": false,
+      "alpha": true,
+      "ratio": "1:1",
+      "light_anchor": "bright high-key midday daylight from upper left, soft sky-blue bounce, no dramatic shadows",
+      "scene": "about",
+      "transparent_bg": "isolated on pure transparent background, clean cutout edge",
+      "prompt": "Sewing flat lay: a wooden spool of thread, a pair of steel fabric scissors, a folded length of patterned cotton fabric, a red tomato pincushion stuck with pins, a tailor's measuring tape curled loosely, items evenly spaced with clear gaps, bright high-key midday daylight from upper left with soft sky-blue bounce and no dramatic shadows, isolated on pure transparent background with clean cutout edges, Y2K collage cutout sticker with slight drop shadow, photographic product realism, not illustrated --ar 1:1 --style raw"
+    },
+    {
+      "id": "sticker-astro",
+      "slot": "sticker-astro",
+      "role": "about \u2014 astrology charms",
+      "have": false,
+      "alpha": true,
+      "ratio": "1:1",
+      "light_anchor": "bright high-key midday daylight from upper left, soft sky-blue bounce, no dramatic shadows",
+      "scene": "about",
+      "transparent_bg": "isolated on pure transparent background, clean cutout edge",
+      "prompt": "Set of four astrology glyph charms in polished brass, laid flat and evenly spaced with clear gaps between them: the Libra scales glyph, the Virgo maiden glyph, the Scorpio scorpion glyph, the Sagittarius archer arrow glyph, each a small engraved medallion with subtle patina, bright high-key midday daylight from upper left with soft sky-blue bounce and no dramatic shadows, isolated on pure transparent background with clean cutout edges, Y2K collage cutout sticker with slight drop shadow, photographic product realism, not illustrated --ar 1:1 --style raw",
+      "notes": "Libra sun / Virgo moon / Scorpio venus / Sagittarius ascendant. Labels are live DOM."
+    }
+  ],
+  "have_already": [
+    {
+      "file": "clouds.png",
+      "size": "5000x2219",
+      "alpha": true,
+      "role": "sky plane"
+    },
+    {
+      "file": "Background grass.png",
+      "size": "880x587",
+      "alpha": true,
+      "role": "hero horizon"
+    },
+    {
+      "file": "footer grass.webp",
+      "size": "1111x350",
+      "alpha": true,
+      "role": "footer horizon"
+    },
+    {
+      "file": "goldfish.png",
+      "size": "1165x972",
+      "alpha": true,
+      "role": "fish A"
+    },
+    {
+      "file": "goldfish 3.webp",
+      "size": "980x980",
+      "alpha": true,
+      "role": "fish B"
+    },
+    {
+      "file": "goldfish2.webp",
+      "size": "350x350",
+      "alpha": true,
+      "role": "fish C"
+    }
+  ],
+  "rendered_in_code": [
+    {
+      "id": "starburst",
+      "why": "flat vector geometry + live text; SVG polygon, no raster needed"
+    },
+    {
+      "id": "bubbles",
+      "why": "animated drift/wobble; CSS radial-gradient spheres on keyframes"
+    }
+  ]
+}

@@ -1,0 +1,288 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root { color-scheme: light; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--f-body);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  /* Horizontal bleed is clipped at the SECTION that creates it (see the hero
+     header's `overflow-x-clip`), never on `html`.
+
+     Putting `overflow-x` on the root element makes it a scroll container. On
+     mobile that produced a second, nested scroller: the page and the root both
+     scrolled, the fixed grain/vignette overlays were re-anchored to it, and the
+     viewport flickered between the two on every scroll frame. `body` alone is
+     the safe belt-and-braces layer because it is not the viewport's scrolling
+     element. */
+  /* The fixed overlay stack (grain/vignette/film-cast) insets itself past the
+     viewport by design; `position:fixed` keeps it out of the scroll width, so
+     it needs no clipping here. Decorative in-flow bleed is clipped at its own
+     section instead — see the `overflow-x-clip` on the hero header and the
+     `overflow-hidden` on the drifting-fish layer. */
+  :focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+  h1, h2, h3 { text-wrap: balance; }
+}
+
+@layer utilities {
+  /* White outline that follows the cut-out's alpha edge, not the PNG box.
+     Eight 2px drop-shadows at 45deg steps build up an even ~5px halo, then the
+     real shadow sits on top. Rendered in one filter chain so it stays crisp. */
+  .sticker {
+    /* Overridable per element. White is right over the sky panel; on the white
+       page ground a white halo is invisible, so those elements set --halo to a
+       tinted edge instead (see .sticker-edge). */
+    --halo: #fff;
+    /* This is a nine-pass filter chain, and it sits on elements that are moved
+       every frame by parallax. Without its own compositor layer the browser
+       re-runs the whole chain on each frame. `will-change: filter` promotes the
+       element so the chain is rasterised once and then only composited.
+       Deliberately NOT `transform: translateZ(0)`: several stickers are animated
+       by Motion, which writes inline transforms that would overwrite it. */
+    will-change: filter;
+    filter:
+      brightness(0.93) contrast(1.20) saturate(1.18) sepia(0.18) hue-rotate(-12deg)
+      drop-shadow(2px 0 0 var(--halo))   drop-shadow(-2px 0 0 var(--halo))
+      drop-shadow(0 2px 0 var(--halo))   drop-shadow(0 -2px 0 var(--halo))
+      drop-shadow(1.5px 1.5px 0 var(--halo))   drop-shadow(-1.5px 1.5px 0 var(--halo))
+      drop-shadow(1.5px -1.5px 0 var(--halo))  drop-shadow(-1.5px -1.5px 0 var(--halo))
+      drop-shadow(0 6px 10px rgb(92 123 166 / 0.42));
+  }
+  /* Sticker cut on a WHITE ground. A white halo would vanish here, so the edge
+     is a pale sky tint: it still reads as a die-cut sticker border, but it is
+     actually visible against the page. */
+  .sticker-edge { --halo: #dbe8f5; }
+
+  /* opt out where a halo would look wrong */
+  .sticker-plain { filter: brightness(0.93) contrast(1.20) saturate(1.18) sepia(0.18) hue-rotate(-12deg)
+    drop-shadow(0 6px 10px rgb(92 123 166 / 0.42)); }
+  .text-pop { text-shadow: 0 3px 12px rgb(10 23 41 / 0.32); }
+  .skip-link {
+    position: absolute; left: -9999px; top: 0; z-index: 100;
+    background: var(--ink); color: var(--paper);
+    padding: 0.75rem 1.25rem; border-radius: 0 0 0.5rem 0;
+  }
+  .skip-link:focus { left: 0; }
+}
+
+@layer utilities {
+  /* ── Fixed overlay stack, bottom to top ────────────────────────────────────
+     9997  .vignette   lens falloff — darkens the image
+     9998  .film-cast  Fuji colour cross (multiply + soft-light)
+     9999  .grain      grain field + black specks
+     Anything new that overlays the page belongs in this list. Note that anything
+     meant to stay UNTINTED must sit above .film-cast. */
+
+  /* Fuji Pro 400H emulation — warm lift, softened contrast, desaturated
+     with a green-to-cyan bias in the shadows. */
+  .fuji-pro-400h {
+    filter: brightness(0.93) contrast(1.20) saturate(1.18) sepia(0.18) hue-rotate(-12deg);
+  }
+
+  /* Film colour cast. Two stacked blends over the whole page:
+     - multiply with a warm amber deepens midtones and darkens slightly
+     - soft-light with a cool teal pushes the shadows green-cyan, the
+       characteristic Fuji cross. */
+  .film-cast::before,
+  .film-cast::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    pointer-events: none;
+  }
+  .film-cast::before {
+    background: #c98a3c;
+    mix-blend-mode: multiply;
+    opacity: 0.14;
+  }
+  .film-cast::after {
+    background: #2a5a60;
+    mix-blend-mode: soft-light;
+    opacity: 0.46;
+  }
+
+  /* Vignette — darkened corners, as a lens falls off toward the edge of the
+     frame. Sits under the grain but over the page so it darkens the image, not
+     the noise. Transparent well past the centre so it never muddies the middle
+     of the composition. */
+  .vignette::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9997;
+    pointer-events: none;
+    background: radial-gradient(
+      118% 88% at 50% 46%,
+      transparent 52%,
+      rgb(10 23 41 / 0.16) 78%,
+      rgb(10 23 41 / 0.42) 100%
+    );
+  }
+
+  /* Gate weave — the whole frame drifts a fraction of a pixel, the way film
+     shifts in a projector gate. Deliberately on a much slower clock than the
+     grain (drift tier, 3s) and sub-pixel in amplitude, so it registers as
+     unsteadiness rather than as movement you can point at. */
+  .gate-weave {
+    animation: gate-weave 3s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  @keyframes gate-weave {
+    0%   { transform: translate3d(0, 0, 0); }
+    22%  { transform: translate3d(0.3px, -0.2px, 0); }
+    45%  { transform: translate3d(-0.2px, 0.3px, 0); }
+    68%  { transform: translate3d(0.2px, 0.25px, 0); }
+    86%  { transform: translate3d(-0.3px, -0.15px, 0); }
+    100% { transform: translate3d(0, 0, 0); }
+  }
+
+  /* Animated film grain — two stacked layers.
+     ::after  = the grain field itself. Lower baseFrequency + fewer octaves =
+                bigger, chunkier clumps than fine sensor noise.
+     ::before = sparse black specks (dust/negative debris). A high-contrast
+                feComponentTransfer clips the noise so only the darkest peaks
+                survive as discrete dots, over a transparent ground.
+     They ride separate animation durations so the specks don't march in
+     lockstep with the grain. */
+  .grain::after,
+  .grain::before {
+    content: "";
+    position: fixed;
+    /* -12% not -50%: the layers only need enough slack to cover the few percent
+       the keyframes translate them by. At -50% each layer was FOUR TIMES the
+       viewport area, so every frame repainted 4x more pixels than it needed to. */
+    inset: -12%;
+    z-index: 9999;
+    pointer-events: none;
+    background-repeat: repeat;
+    will-change: transform;
+  }
+
+  .grain::after {
+    opacity: 0.30;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.55' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncA type='linear' slope='1.4' intercept='-0.1'/></feComponentTransfer></filter><rect width='140' height='140' filter='url(%23n)' opacity='0.8'/></svg>");
+    animation: grain-shift 640ms steps(1, end) infinite;
+  }
+
+  /* black specks — discrete dark dots, transparent between them */
+  .grain::before {
+    opacity: 0.42;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='s' color-interpolation-filters='sRGB'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' seed='7' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncA type='discrete' tableValues='0 0 0 0 0 0 0 0 0 0 0 0 0 0 1'/></feComponentTransfer><feColorMatrix type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0'/></filter><rect width='220' height='220' filter='url(%23s)'/></svg>");
+    animation: speck-shift 900ms steps(1, end) infinite;
+  }
+
+  @keyframes grain-shift {
+    0%   { transform: translate3d(0, 0, 0); }
+    12%  { transform: translate3d(-3%, -2%, 0); }
+    25%  { transform: translate3d(2%, -4%, 0); }
+    37%  { transform: translate3d(-4%, 3%, 0); }
+    50%  { transform: translate3d(3%, 2%, 0); }
+    62%  { transform: translate3d(-2%, 4%, 0); }
+    75%  { transform: translate3d(4%, -3%, 0); }
+    87%  { transform: translate3d(-3%, -4%, 0); }
+    100% { transform: translate3d(0, 0, 0); }
+  }
+
+  @keyframes speck-shift {
+    0%   { transform: translate3d(0, 0, 0); }
+    20%  { transform: translate3d(5%, -3%, 0); }
+    40%  { transform: translate3d(-4%, 5%, 0); }
+    60%  { transform: translate3d(3%, 4%, 0); }
+    80%  { transform: translate3d(-5%, -2%, 0); }
+    100% { transform: translate3d(0, 0, 0); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  /* Grain and weave freeze to a single static frame — the film treatment stays
+     (it is part of the look, not an animation), it simply stops moving. */
+  .grain::after, .grain::before { animation: none !important; }
+  .gate-weave { animation: none !important; transform: none !important; }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ── Frutiger Aero scrollbars ──────────────────────────────────────────────
+   Same surface language as the CTA lozenge and the scroll cue: a glossy blue
+   capsule with a bright specular highlight down its upper half, an inner top
+   light and inner bottom shadow so it reads as a physical bubble, over a pale
+   sky trough.
+
+   Two syntaxes, because they are not interchangeable. `::-webkit-scrollbar-*`
+   is the only one that can carry a gradient and is what Chrome, Edge and Safari
+   use. `scrollbar-color` is the standard property Firefox implements, and it
+   accepts flat colours ONLY — so Firefox gets the closest solid equivalent
+   rather than the gloss. Declaring both is deliberate, not redundant. */
+@supports (scrollbar-color: auto) {
+  html {
+    scrollbar-color: var(--sky-main) rgb(219 232 245 / 0.55);
+    scrollbar-width: thin;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+::-webkit-scrollbar-track {
+  background:
+    linear-gradient(90deg, rgb(10 23 41 / 0.10) 0%, rgb(10 23 41 / 0) 38%),
+    linear-gradient(180deg, #e6f0fa 0%, #d3e5f6 100%);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  /* 3px of track showing on every side, so the capsule floats in the trough
+     instead of filling it. `background-clip: padding-box` is what keeps the
+     gradient off that border. */
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  background-image:
+    /* specular sweep — upper half only, so the capsule reads as glass */
+    linear-gradient(180deg, rgb(255 255 255 / 0.92) 0%, rgb(255 255 255 / 0.28) 42%, rgb(255 255 255 / 0) 60%),
+    linear-gradient(180deg, #7cc0ee 0%, var(--sky-main) 48%, var(--sky-edge) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.95),
+    inset 0 -2px 4px rgb(11 45 92 / 0.5),
+    inset 0 0 0 1px rgb(255 255 255 / 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-image:
+    linear-gradient(180deg, rgb(255 255 255 / 0.98) 0%, rgb(255 255 255 / 0.36) 42%, rgb(255 255 255 / 0) 60%),
+    linear-gradient(180deg, #8ccbf3 0%, #57a0d8 48%, var(--sky-edge) 100%);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-image:
+    linear-gradient(180deg, rgb(255 255 255 / 0.7) 0%, rgb(255 255 255 / 0.2) 42%, rgb(255 255 255 / 0) 60%),
+    linear-gradient(180deg, var(--sky-main) 0%, var(--sky-edge) 100%);
+}
+
+::-webkit-scrollbar-corner {
+  background: #d3e5f6;
+}
+
+/* The film treatment is a fixed overlay across the whole viewport, and on a
+   desktop browser it tints the scrollbar along with the page. The overlays sit
+   at z-index 9997-9999 and the scrollbar is painted by the UA above all of it,
+   so nothing needs excluding — noted here so a future change to the overlay
+   stack does not try to "fix" a scrollbar that was never being tinted. */

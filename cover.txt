@@ -1,0 +1,34 @@
+Once upon a time in a land far away, in always-sunny Skopje, in the wake of the new milenium dotcom
+craze, there was a little girl who saw the world in Technicolor. She much preferred the visual language of
+moving symbolism over words. If a picture can replace a thousand words, how many can we replace if that
+image can move? That pivotal question marked the beginning of a designer who wanted to create worlds
+rather than merely describe them. The answer to the question was simple, Code. Code can make symbols
+move and tell an interactive visual story where both the creator and the viewer create the final moving
+picture.
+I’ve created visual languages, designed billboards and brands, and operated my own visual studio, LINV. I
+gradually came to understand that every creative act is a system that is just waiting to be automated. I
+discovered that well-engineered beauty scales better. My start was humble, with HTML based websites
+and clever Python bots and automation scripts. Simplicity is key, and often lacking in todays tech-first
+world where the new framework is king. A new robust technical skillset emerged, while the drive and child-
+like wonder towards visually told stories remained.
+I was raised to lead by example, to take initiative, and to offer help in the form of a lovingly engineered
+skillset that’s hard to ignore. Quiet overachievers often get overlooked as sometimes the enthusiastic
+smile doesn’t match the expected image of an “industry-hardened” senior. But I’ve been building since my
+teens: not to be a company asset, but a company weapon (in the best way) and deliver quality beyond
+industry standards. This path has led me to a number of interesting opportunities, to mentor, to lead, to
+improve user experience, and I took every single one of them.
+I’ve spent the past few years building little universes in code, and lately, building the builders. At
+CrazyLabs, I lead the architecture behind internal automation platforms and AI-assisted tooling, designing
+multi-agent workflows that generate, localize, validate, and ship production-ready code with minimal
+human intervention. My focus is on scalable systems, reliable pipelines, and tools that make complex
+engineering feel effortless.
+Because at this point, you’re not really hiring one person, you’re hiring my lovingly curated team of AI
+agents, and I just happen to be their slightly overprotective systems architect.
+Now I’m looking for the next world to build, a place where design meets data, where AI helps creation
+instead of replacing it, where imagination still has a compiler.
+Thank you for listening to my story.
+If it resonated, maybe we’re building the same kind of universe.
+
+
+ with love and coffee from always-sunny Skopje,
+Kristina Mladenova

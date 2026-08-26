@@ -1,0 +1,6 @@
+node_modules
+.next
+out
+.asset-cache
+.DS_Store
+*.tsbuildinfo

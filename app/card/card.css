@@ -1,0 +1,563 @@
+/* ── Business card, print-exact ────────────────────────────────────────────
+   85mm x 55mm, the ISO 7810 ID-1 / European business card size. Printers want
+   3mm bleed on every edge, so the physical page is 91mm x 61mm and the trim
+   line sits 3mm inside it. Everything important stays inside a further 3mm
+   safe margin, because trimming is not precise to the millimetre.
+
+   All print units are `mm`, never px: at print time px is tied to a nominal
+   96dpi and rounds badly, while `mm` maps straight onto the page box. */
+
+:root {
+  --card-w: 85mm;
+  --card-h: 55mm;
+  --bleed: 3mm;
+  --safe: 3mm;
+  --page-w: 91mm;  /* card + bleed on both sides */
+  --page-h: 61mm;
+
+  --sky-main: #488ec9;
+  --sky-edge: #2765c8;
+  --ink: #0a1729;
+  --ink-soft: #41597a;
+  --paper: #ffffff;
+  --orange: #f26a1b;
+}
+
+/* ── Screen preview ──────────────────────────────────────────────────────── */
+
+/* The card page opts out of the site's film treatment on screen too, so what you
+   preview is what prints. Scoped to this page via .card-stage rather than
+   changing the shared layout. */
+body:has(.card-stage) .grain::before,
+body:has(.card-stage) .grain::after,
+body:has(.card-stage) .film-cast::before,
+body:has(.card-stage) .film-cast::after,
+body:has(.card-stage) .vignette::before {
+  display: none;
+}
+body:has(.card-stage) .gate-weave { animation: none; transform: none; }
+
+:root { --preview-scale: 1; }
+
+/* Screen preview only. The scale is applied with a transform on the sheet so it
+   cannot alter the card's own inch-based geometry, which is what prints. */
+.card-sheet {
+  transform: scale(var(--preview-scale));
+  transform-origin: top center;
+  transition: transform 0.12s ease-out, margin 0.12s ease-out;
+  /* A transform does not affect layout, so a scaled-up card would overlap the
+     next one. This reserves the extra height the scale actually consumes. */
+  margin-bottom: calc((var(--preview-scale) - 1) * var(--card-h));
+}
+
+.card-calibrate {
+  width: min(30rem, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(10, 23, 41, 0.1);
+}
+.card-calibrate-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.card-calibrate-row input { flex: 1; min-width: 0; accent-color: var(--sky-edge); }
+.card-calibrate-row output { min-width: 3.4em; text-align: right; color: var(--ink); }
+.card-calibrate-hint { margin: 0; font-size: 11px; line-height: 1.5; color: var(--ink-soft); }
+.card-calibrate-reset {
+  align-self: flex-start;
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 11px;
+  color: var(--sky-edge);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.card-stage {
+  min-height: 100vh;
+  padding: 2.5rem 1.25rem 4rem;
+  background: #eef4fa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  color: var(--ink);
+}
+
+.card-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.card-hint {
+  max-width: 46ch;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.card-print-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0 1.75rem;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper);
+  cursor: pointer;
+  background: linear-gradient(180deg, #6fb7ec 0%, var(--sky-main) 46%, var(--sky-edge) 100%);
+  box-shadow:
+    inset 0 2px 1px rgba(255, 255, 255, 0.95),
+    inset 0 -3px 8px rgba(11, 45, 92, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.32),
+    0 10px 26px rgba(39, 101, 200, 0.42);
+  text-shadow: 0 1px 2px rgba(10, 23, 41, 0.45);
+  transition: transform 0.2s;
+}
+.card-print-btn:hover { transform: translateY(-2px); }
+.card-print-btn:active { transform: none; }
+.card-print-btn:focus-visible { outline: 3px solid var(--sky-edge); outline-offset: 4px; }
+
+/* ── The card faces ──────────────────────────────────────────────────────── */
+
+.card {
+  position: relative;
+  width: var(--card-w);
+  height: var(--card-h);
+  overflow: hidden;
+  color: var(--paper);
+  /* Screen only: a shadow and rounded corner so it reads as a physical card.
+     Both are removed for print, where the trim does the work. */
+  border-radius: 2.03mm;
+  box-shadow: 0 12px 34px rgba(10, 23, 41, 0.24);
+}
+
+/* ── Front face: the site's hero, reproduced at card scale ────────────────
+   Same layer stack and the same horizon rule as Hero.tsx: sky gradient, cloud
+   bank, the grass plate anchored by its TOP edge at the horizon, and the
+   headline centred on that same line so the type is half-buried by the field.
+   The figure stands on the right and her hand breaks the bottom edge.
+
+   --horizon is the single number the grass and the headline share, exactly as
+   HORIZON_PCT does on the site. */
+
+.card-face-front {
+  --horizon: 50%;
+
+  /* ── Figure geometry, and the text gutter derived from it ────────────────
+     The cut-out is opaque across effectively its full width (alpha starts at
+     ~1% from the left) through the whole vertical band the headline occupies,
+     so its bounding box IS the collision boundary — there is no transparent
+     margin to tuck type into.
+
+     Everything below is derived from these three numbers, so the figure can be
+     resized or repositioned and the text gutter follows automatically. That is
+     the point: previously the gutter was an independent magic number and any
+     nudge to the figure silently pushed it over the type. */
+  --figure-h: 47.24mm;
+  --figure-aspect: 0.80132;                  /* 609 / 760, the asset's own ratio */
+  --figure-right: -4.52mm;                   /* negative = bleeds off the right edge */
+  --figure-w: calc(var(--figure-h) * var(--figure-aspect));
+  /* Distance from the card's right edge to the figure's left edge. */
+  --figure-left-inset: calc(var(--figure-w) + var(--figure-right));
+  /* Breathing room between the type and the cut-out. */
+  --figure-text-gap: 2mm;
+  /* Every text block on this face reserves this much room on the right. */
+  --text-gutter: calc(var(--figure-left-inset) + var(--figure-text-gap));
+  background: radial-gradient(120% 130% at 50% 12%, var(--sky-main) 0%, var(--sky-edge) 100%);
+}
+
+/* Grass: repeated at its true 880x342 aspect and anchored by its TOP at the
+   horizon. Whatever hangs past the card's bottom edge is clipped by .card's
+   overflow, the same way the site clips it. */
+.card-grass {
+  position: absolute;
+  top: var(--horizon);
+  left: -2.54mm;
+  right: -2.54mm;
+  z-index: 2;
+  height: 33.02mm;              /* taller than the space left; deliberately clipped */
+  background-image: var(--grass-img);
+  background-repeat: repeat-x;
+  background-position: left top;
+  background-size: auto 100%;
+}
+
+.card-clouds {
+  position: absolute;
+  top: -1.02mm;
+  left: -6.35mm;
+  z-index: 1;
+  width: 132.08mm;
+  opacity: 0.6;
+}
+
+/* Line 1: centred ON the horizon and BEHIND the grass, so it is half-buried. */
+.card-headline {
+  position: absolute;
+  top: var(--horizon);
+  left: 0;
+  /* Derived from the figure's real width, never hand-tuned. */
+  right: var(--text-gutter);
+  z-index: 1;
+  margin: 0;
+  transform: translateY(-50%);
+  text-align: center;
+  font-family: "CrossStitch", "Comic Sans MS", cursive;
+  font-size: 8.64mm;
+  line-height: 0.88;
+  color: var(--paper);
+  /* Two shadows: a tight dark core for edge definition against the pale sky,
+     then a wider soft one for lift. Both in pt so they hold up in print. */
+  text-shadow: 0 0.6pt 1pt rgba(10, 23, 41, 0.62), 0 1.6pt 3.4pt rgba(10, 23, 41, 0.42);
+}
+
+/* Line 2: IN FRONT of the grass, directly under line 1. */
+.card-headline-2 {
+  position: absolute;
+  top: var(--horizon);
+  left: 0;
+  right: var(--text-gutter);
+  z-index: 3;
+  margin: 0;
+  /* A very small nudge down from line 1, nothing more. */
+  transform: translateY(1.14mm);
+  text-align: center;
+  font-family: "CrossStitch", "Comic Sans MS", cursive;
+  font-size: 6.35mm;
+  line-height: 0.88;
+  color: var(--paper);
+  text-shadow: 0 0.6pt 1pt rgba(10, 23, 41, 0.62), 0 1.6pt 3.4pt rgba(10, 23, 41, 0.42);
+}
+
+/* The figure: right-anchored, hand crossing the bottom edge, above the grass.
+   Carries the site's sticker halo: eight offset drop-shadows at 45deg steps
+   build an even white outline that follows the cut-out's real alpha edge rather
+   than its bounding box, then a soft shadow sits on top. Offsets are in pt, not
+   px, so the stroke keeps its weight when the page scales up for print bleed. */
+.card-figure {
+  position: absolute;
+  /* Position and size both come from the vars on .card-face-front, which is
+     also where the text gutter is computed from them. */
+  right: var(--figure-right);
+  bottom: -1.02mm;
+  z-index: 4;
+  height: var(--figure-h);
+  width: auto;
+  filter:
+    drop-shadow(0.6pt 0 0 #fff)      drop-shadow(-0.6pt 0 0 #fff)
+    drop-shadow(0 0.6pt 0 #fff)      drop-shadow(0 -0.6pt 0 #fff)
+    drop-shadow(0.45pt 0.45pt 0 #fff)  drop-shadow(-0.45pt 0.45pt 0 #fff)
+    drop-shadow(0.45pt -0.45pt 0 #fff) drop-shadow(-0.45pt -0.45pt 0 #fff)
+    drop-shadow(0 2pt 3pt rgba(10, 23, 41, 0.34));
+}
+
+/* Name and role along the BOTTOM. Uses the same derived gutter as the
+   headline: the figure is opaque out to ~31.7mm from the card's right edge in
+   this bottom band (arm and phone stand), which is wider than the QR chip, so
+   clearing the figure clears the QR too. */
+.card-idblock {
+  position: absolute;
+  left: var(--safe);
+  bottom: var(--safe);
+  right: var(--text-gutter);
+  z-index: 5;
+}
+
+.card-name {
+  margin: 0;
+  font-family: "CrossStitch", "Comic Sans MS", cursive;
+  font-size: 5.08mm;
+  line-height: 1;
+  color: var(--paper);
+  text-shadow: 0 0.6pt 1pt rgba(10, 23, 41, 0.66), 0 1.6pt 3.4pt rgba(10, 23, 41, 0.44);
+}
+
+.card-role {
+  margin: 0.38mm 0 0;
+  font-size: 6pt;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper);
+  text-shadow: 0 0.5pt 1pt rgba(10, 23, 41, 0.7), 0 1.2pt 2.6pt rgba(10, 23, 41, 0.44);
+}
+
+/* QR, bottom-right. Always on a light chip: printed over the grass texture it
+   would not scan reliably. */
+.card-qr {
+  position: absolute;
+  right: var(--safe);
+  bottom: var(--safe);
+  z-index: 5;
+  /* 20mm (2cm) is the print-trade minimum for a business-card QR, and the
+     quiet zone is baked into the SVG (see scripts/gen-qr.mjs), so this whole
+     box is scannable area. At 41 modules that is 0.49mm per module, over the
+     0.4mm minimum module size presses quote for reliable scanning.
+     Padding is 0 deliberately: the SVG already carries its own 4-module white
+     margin, and adding more would only shrink the code inside a fixed box. */
+  width: 20mm;
+  height: 20mm;
+  padding: 0;
+  border-radius: 0.76mm;
+  /* Fully opaque, not 96%: a translucent plate lets the sky gradient tint the
+     code's white modules, cutting the light/dark contrast scanners rely on. */
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(10, 23, 41, 0.28);
+}
+.card-qr img { display: block; width: 100%; height: 100%; }
+
+/* ── Back face: the "What's on my laptop" section, plain white ────────────
+   Mirrors that section's structure: a bracketed monospace label, then columns
+   of dt/dd pairs with mono uppercase keys in sky-edge and pill-shaped values.
+   White ground, no grass, no sky, because this face is dense text and print
+   legibility beats decoration. */
+.card-face-back {
+  background: #ffffff;
+  color: var(--ink);
+}
+
+/* The front positions every element absolutely, so .card-inner is used only by
+   the back, where the content is a normal top-down document. */
+.card-inner {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  padding: calc(var(--safe) + 0.51mm) calc(var(--safe) + 1.02mm);
+  display: flex;
+  flex-direction: column;
+}
+
+/* LinkedIn, centred at the foot of the back face. */
+.card-back-link {
+  margin: auto 0 0;
+  padding-top: 1.27mm;
+  text-align: center;
+  font-size: 5.6pt;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--sky-edge);
+}
+
+.card-back-label {
+  margin: 1.52mm 0 0;
+  width: 100%;
+  text-align: center;
+  font-size: 5.4pt;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+
+.card-back-cols {
+  display: grid;
+  /* minmax(0,1fr), not 1fr: a bare 1fr floors at min-content, so a long pill
+     would widen the column past the card instead of wrapping inside it. */
+  grid-template-columns: 22.35mm minmax(0, 1fr);
+  gap: 4.06mm;
+  align-items: center;
+  /* .card-inner is a flex column, so this grid would otherwise be only as tall
+     as its content and sit at the top; `flex: 1` makes it claim the full height
+     between the padding and the LinkedIn foot, which is what `align-items:
+     center` then centres the laptop column against. */
+  flex: 1;
+  min-height: 0;
+}
+
+/* The laptop is the section's centrepiece on the site, so it holds the left
+   column here rather than being decoration. */
+.card-laptop-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.card-laptop {
+  width: 100%;
+  max-width: 22.35mm;         /* about a quarter of the 85mm card, so the text breathes */
+  height: auto;
+  /* Sticker halo tracing the cut-out's real alpha edge, eight offsets at 45deg
+     steps. The edge is a pale sky tint rather than white: this face is #ffffff,
+     so a white halo would be invisible. Offsets in pt, not px, so the stroke
+     keeps its weight when the page scales for print bleed, and lighter than the
+     figure's (0.4pt vs 0.6pt) since a heavy outline would swallow the laptop's
+     detail at this size. */
+  filter:
+    drop-shadow(0.4pt 0 0 #dbe8f5)      drop-shadow(-0.4pt 0 0 #dbe8f5)
+    drop-shadow(0 0.4pt 0 #dbe8f5)      drop-shadow(0 -0.4pt 0 #dbe8f5)
+    drop-shadow(0.28pt 0.28pt 0 #dbe8f5)  drop-shadow(-0.28pt 0.28pt 0 #dbe8f5)
+    drop-shadow(0.28pt -0.28pt 0 #dbe8f5) drop-shadow(-0.28pt -0.28pt 0 #dbe8f5)
+    drop-shadow(0 1.5pt 2.5pt rgba(10, 23, 41, 0.3));
+}
+
+/* Extra air above a heading that follows a previous block. */
+.card-sec-h--gap { margin-top: 1.78mm; }
+
+.card-note {
+  margin: 0;
+  font-size: 5.2pt;
+  line-height: 1.36;
+  color: var(--ink-soft);
+}
+
+.card-tags {
+  /* No heading above this row any more, so the gap does the separating. */
+  margin: 1.9mm 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.56mm;
+  min-width: 0;   /* a grid child defaults to min-content and would not shrink */
+}
+
+.card-sec-h {
+  margin: 0 0 0.89mm;
+  font-size: 5.2pt;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sky-edge);
+}
+
+/* The joke tag takes the full row and sits in a lighter register than the real
+   skills beside it, so it reads as an aside rather than a claim. */
+.card-tag--wink {
+  border-style: dashed;
+  border-color: rgba(39, 101, 200, 0.34);
+  font-style: italic;
+  color: rgba(65, 89, 122, 0.85);
+}
+
+.card-tag {
+  font-size: 5pt;
+  line-height: 1.1;
+  padding: 0.66mm 1.27mm;
+  border: 0.4pt solid rgba(39, 101, 200, 0.42);
+  border-radius: 999px;
+  color: var(--ink-soft);
+  /* Never nowrap here. A pill wider than the column cannot shrink and simply
+     runs off the card's right edge, which is exactly what was clipping. These
+     wrap internally and the flex row is allowed to shrink them. */
+  white-space: normal;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+.card-list { margin: 0; padding: 0; list-style: none; }
+.card-list li { margin-bottom: 1.4mm; font-size: 5.8pt; line-height: 1.34; }
+.card-list li:last-child { margin-bottom: 0; }
+
+/* Three talks in the space two roles take: same structure, less air. */
+.card-list strong { display: block; font-size: 6pt; font-weight: 700; color: var(--ink); }
+.card-list span { color: var(--ink-soft); }
+
+/* ── Print ───────────────────────────────────────────────────────────────── */
+
+@page {
+  /* Page is card + bleed. Zero margin so the artwork reaches the paper edge;
+     the printer trims back to 85x55. */
+  size: var(--page-w) var(--page-h);
+  margin: 0;
+}
+
+@media print {
+  /* Ask the browser to keep backgrounds; without this most engines drop every
+     background-image and gradient, and the card prints as bare text. */
+  html, body {
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* The root layout wraps every page in the site's film treatment. On a printed
+     card that would lay grain, specks, a vignette and a colour cast over the
+     artwork, so all four fixed overlays are suppressed here. */
+  .grain::before, .grain::after,
+  .film-cast::before, .film-cast::after,
+  .vignette::before {
+    display: none !important;
+    content: none !important;
+  }
+  /* Gate weave shifts the page by a sub-pixel amount; harmless on screen,
+     but it must not nudge a print that has to line up with a trim line. */
+  .gate-weave { animation: none !important; transform: none !important; }
+
+  .card-stage { display: block; min-height: 0; padding: 0; background: none; }
+  .card-toolbar, .card-screen-only { display: none !important; }
+  /* The site-wide audio toggle is fixed to the viewport and sits outside
+     .card-stage, so it survives every other print suppression above and
+     lands right over the QR code. */
+  button[aria-label*="audio" i] { display: none !important; }
+  /* The preview scale is a screen affordance; print uses the real geometry. */
+  .card-sheet { transform: none !important; }
+
+  .card-sheet {
+    /* One card per page, centred in the bleed area. */
+    width: var(--page-w);
+    height: var(--page-h);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    page-break-after: always;
+    break-after: page;
+  }
+  .card-sheet:last-child { page-break-after: auto; break-after: auto; }
+
+  .card {
+    border-radius: 0;
+    box-shadow: none;
+    /* Scale up by the bleed so artwork runs past the trim line on all sides. */
+    width: var(--page-w);
+    height: var(--page-h);
+  }
+}
+
+/* ── Export status ─────────────────────────────────────────────────────────
+   Screen only; both are suppressed in print along with the rest of the toolbar
+   (see .card-toolbar in the print block above, which is their parent). */
+.card-export-status:empty { display: none; }
+.card-export-status {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+.card-export-error {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #b3261e; /* AA on the toolbar's white background */
+}
+
+/* The two face buttons sit in a row, wrapping on narrow screens. */
+.card-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
